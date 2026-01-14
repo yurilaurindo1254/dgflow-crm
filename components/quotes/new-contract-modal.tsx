@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase";
 import { getContractPreview } from "@/lib/utils/contracts";
 import { FileText, Loader2, Plus, Search, ChevronRight, ChevronLeft, Eye, Save } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Quote } from "@/lib/schemas/quote";
+import { Quote, QuoteItem } from "@/lib/schemas/quote";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
@@ -99,41 +99,38 @@ export function NewContractModal({ onUpdate }: { onUpdate: () => void }) {
     };
 
     // Initialize Form Data when Quote is selected
-    useEffect(() => {
-        if (selectedQuote) {
-            const client = selectedQuote.clients;
-            
-            // Format services list
-            let servicesList = "";
-            if (selectedQuote.itens && Array.isArray(selectedQuote.itens)) {
-                servicesList = (selectedQuote.itens as any[]).map((i: any) => `${i.nome_item} (${i.quantidade}x)`).join(', ');
-            }
 
-            setFormData({
-                projectTitle: selectedQuote.titulo || "",
-                duration: selectedQuote.prazo_entrega || "",
-                services: servicesList || "Ver proposta anexa",
-                
-                clientName: client?.name || "",
-                clientCpfCnpj: client?.cpf_cnpj || "",
-                clientAddress: client?.address || "",
-                clientNumber: client?.number || "",
-                clientCity: client?.city || "",
-                clientState: client?.state || "",
-                clientRep: client?.name || "", // Often same as client name for individuals
 
-                totalValue: (selectedQuote.subtotal || 0).toFixed(2),
-                discount: (selectedQuote.desconto || 0).toFixed(2),
-                finalValue: (selectedQuote.total || 0).toFixed(2),
-                paymentMethod: "Boleto",
-                installments: "1",
-                conditions: "À vista",
-            });
-        }
-    }, [selectedQuote]);
-
-    const handleSelectQuote = (quote: any) => {
+    const handleSelectQuote = (quote: QuoteWithClient) => {
         setSelectedQuote(quote);
+        
+        const client = quote.clients;
+        let servicesList = "";
+        if (quote.itens && Array.isArray(quote.itens)) {
+            servicesList = (quote.itens as QuoteItem[]).map((i: QuoteItem) => `${i.nome_item} (${i.quantidade}x)`).join(', ');
+        }
+
+        setFormData({
+            projectTitle: quote.titulo || "",
+            duration: quote.prazo_entrega || "",
+            services: servicesList || "Ver proposta anexa",
+            
+            clientName: client?.name || "",
+            clientCpfCnpj: client?.cpf_cnpj || "",
+            clientAddress: client?.address || "",
+            clientNumber: client?.number || "",
+            clientCity: client?.city || "",
+            clientState: client?.state || "",
+            clientRep: client?.name || "",
+
+            totalValue: (quote.subtotal || 0).toFixed(2),
+            discount: (quote.desconto || 0).toFixed(2),
+            finalValue: (quote.total || 0).toFixed(2),
+            paymentMethod: "Boleto",
+            installments: "1",
+            conditions: "À vista",
+        });
+
         setStep('BASIC_DATA');
     };
 

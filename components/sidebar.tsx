@@ -16,6 +16,7 @@ import {
   LogOut,
   ChevronsUpDown,
   Briefcase,
+  BarChart3,
 } from "lucide-react";
 import clsx from "clsx";
 import { usePathname, useRouter } from "next/navigation";
@@ -28,22 +29,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
 import { NotificationCenter } from "@/components/notifications/notification-center";
+import { useSettings } from "@/contexts/settings-context";
+import { Globe, Coins } from "lucide-react";
 
-const menuItems = [
-  { name: "Visão Geral", icon: LayoutDashboard, href: "/" },
-  { name: "Projetos", icon: Briefcase, href: "/projetos" },
-  { name: "Clientes", icon: Users, href: "/clientes" },
-  { name: "Pipelines", icon: Filter, href: "/pipelines" },
-  { name: "Agenda", icon: Calendar, href: "/agenda" },
-  { name: "Financeiro", icon: DollarSign, href: "/financeiro" },
-  { name: "Serviços", icon: Package, href: "/servicos" },
-  { name: "Orçamentos", icon: FileText, href: "/orcamentos" },
-  { name: "Briefings", icon: FileInput, href: "/briefings" },
-  { name: "Link na Bio", icon: Smartphone, href: "/link-bio" },
-  { name: "Equipe", icon: Users, href: "/equipe" },
-  { name: "Configurações", icon: Settings, href: "/configuracoes" },
-];
 
 import { useModal } from '@/contexts/modal-context';
 import { NewProposalModal } from '@/components/modals/new-proposal-modal';
@@ -55,6 +45,7 @@ export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { openModal } = useModal();
+  const { language, setLanguage, currency, setCurrency, t } = useSettings();
 
   const handleLogout = async () => {
     try {
@@ -65,6 +56,22 @@ export function Sidebar() {
       console.error("Error logging out:", error);
     }
   };
+
+  const menuItems = [
+    { name: t('sidebar.dashboard'), icon: LayoutDashboard, href: "/" },
+    { name: t('sidebar.projects'), icon: Briefcase, href: "/projetos" },
+    { name: t('sidebar.clients'), icon: Users, href: "/clientes" },
+    { name: t('sidebar.pipelines'), icon: Filter, href: "/pipelines" },
+    { name: t('sidebar.agenda'), icon: Calendar, href: "/agenda" },
+    { name: t('sidebar.finance'), icon: DollarSign, href: "/financeiro" },
+    { name: t('sidebar.services'), icon: Package, href: "/servicos" },
+    { name: t('sidebar.quotes'), icon: FileText, href: "/orcamentos" },
+    { name: t('sidebar.briefings'), icon: FileInput, href: "/briefings" },
+    { name: t('sidebar.performance'), icon: BarChart3, href: "/performance" },
+    { name: t('sidebar.link_bio'), icon: Smartphone, href: "/link-bio" },
+    { name: t('sidebar.team'), icon: Users, href: "/equipe" },
+    { name: t('sidebar.settings'), icon: Settings, href: "/configuracoes" },
+  ];
 
   return (
     <aside className="fixed left-0 top-0 h-full w-20 hover:w-64 bg-black/40 backdrop-blur-xl border-r border-white/5 flex flex-col z-50 transition-all duration-300 ease-in-out group overflow-hidden">
@@ -86,7 +93,9 @@ export function Sidebar() {
           <div className="shrink-0">
             <Plus size={24} className="group-hover/btn:rotate-90 transition-transform duration-300" />
           </div>
-          <span className="whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300">Nova Proposta</span>
+          <span className="whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+             {t('common.create')} Proposta
+          </span>
         </button>
       </div>
 
@@ -171,9 +180,45 @@ export function Sidebar() {
                 onClick={() => router.push("/configuracoes")}
             >
                 <Settings className="mr-2 h-4 w-4" />
-                <span>Configurações</span>
+                <span>{t('sidebar.settings')}</span>
             </DropdownMenuItem>
+
             <DropdownMenuSeparator className="bg-white/10 my-1" />
+            
+            <DropdownMenuLabel className="text-[10px] uppercase text-zinc-500 font-bold px-2 py-1">Preferências</DropdownMenuLabel>
+            
+            <div className="flex px-2 py-1 gap-2">
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="sm" className="flex-1 h-8 bg-white/5 border border-white/10 hover:bg-white/10 p-0 text-[10px] font-bold">
+                            <Globe size={12} className="mr-1.5" />
+                            {language.toUpperCase()}
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent side="top" align="start" className="bg-black border-white/10 text-white min-w-[100px]">
+                        <DropdownMenuItem onClick={() => setLanguage('pt')} className="text-xs">Português</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setLanguage('en')} className="text-xs">English</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setLanguage('es')} className="text-xs">Español</DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="sm" className="flex-1 h-8 bg-white/5 border border-white/10 hover:bg-white/10 p-0 text-[10px] font-bold">
+                            <Coins size={12} className="mr-1.5" />
+                            {currency}
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent side="top" align="end" className="bg-black border-white/10 text-white min-w-[100px]">
+                        <DropdownMenuItem onClick={() => setCurrency('BRL')} className="text-xs">BRL (R$)</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setCurrency('USD')} className="text-xs">USD ($)</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setCurrency('EUR')} className="text-xs">EUR (€)</DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            </div>
+
+            <DropdownMenuSeparator className="bg-white/10 my-1" />
+            
             <DropdownMenuItem 
                 className="text-red-500 focus:text-red-400 focus:bg-red-500/10 cursor-pointer px-2 py-2 rounded-md"
                 onClick={handleLogout}

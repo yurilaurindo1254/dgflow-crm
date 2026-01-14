@@ -7,7 +7,7 @@ import {
   CheckCircle2,
   Clock,
   LogOut,
-  User
+  Filter
 } from "lucide-react";
 import clsx from "clsx";
 import { usePathname, useRouter } from "next/navigation";
@@ -16,6 +16,7 @@ import { supabase } from "@/lib/supabase";
 const portalMenuItems = [
   { name: "Início", icon: LayoutDashboard, href: "/portal" },
   { name: "Performance", icon: BarChart3, href: "/portal/performance" },
+  { name: "Funis", icon: Filter, href: "/portal/funis" },
   { name: "Projetos", icon: CheckCircle2, href: "/portal/projects" },
   { name: "Aprovações", icon: Clock, href: "/portal/approvals" },
 ];

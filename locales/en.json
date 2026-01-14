@@ -1,0 +1,49 @@
+{
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome back, here is your business summary.",
+    "monthly_revenue": "Monthly Revenue",
+    "expenses": "Expenses",
+    "new_leads": "New Leads",
+    "net_profit": "Net Profit",
+    "conversion": "Conversion",
+    "active_projects": "In Progress",
+    "projects": "Projects",
+    "recent_projects": "Recent Projects",
+    "recent_activity": "Recent Activity",
+    "analysis": "Consolidated Financial Analysis",
+    "analysis_desc": "Revenue and expense performance over the last 6 months",
+    "syncing": "Syncing data...",
+    "everything_up_to_date": "Everything up to date!",
+    "no_projects": "No projects in progress",
+    "revenue_goal": "Revenue Goal",
+    "current_month_progress": "Current month progress",
+    "reached": "reached",
+    "remaining": "Remaining"
+  },
+  "sidebar": {
+    "dashboard": "Dashboard",
+    "pipelines": "Pipelines",
+    "projects": "Projects",
+    "clients": "Clients",
+    "finance": "Finance",
+    "agenda": "Agenda",
+    "services": "Services",
+    "quotes": "Quotes",
+    "briefings": "Briefings",
+    "performance": "Performance",
+    "link_bio": "Link in Bio",
+    "team": "Team",
+    "settings": "Settings"
+  },
+  "common": {
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "delete": "Delete",
+    "create": "Create",
+    "search": "Search...",
+    "filter": "Filter"
+  }
+}

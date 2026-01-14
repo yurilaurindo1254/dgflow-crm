@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { 
-  smartphone, 
+  Smartphone, 
   Share2, 
   Plus, 
   GripVertical, 

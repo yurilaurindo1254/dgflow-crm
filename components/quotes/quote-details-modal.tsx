@@ -2,18 +2,17 @@
 
 import { useEffect, useState } from "react";
 import { Modal } from "@/components/ui/modal";
-import { Quote } from "@/lib/schemas/quote";
+import { Quote, QuoteItem } from "@/lib/schemas/quote";
 import { supabase } from "@/lib/supabase";
 import { Loader2, Calendar, Clock, Box } from "lucide-react";
 
-import { Quote } from "@/lib/schemas/quote";
 
 interface QuoteDetailsModalProps {
     quote: Quote & { id: string; created_at: string; prazo_entrega: string; data_validade: string }; // Intersection to ensure required fields
 }
 
 export function QuoteDetailsModal({ quote }: QuoteDetailsModalProps) {
-    const [items, setItems] = useState<any[]>([]); // Items schema could also be improved but 'any' is okay for now if not strictly defined in schema file as 'QuoteItem' equivalent from DB
+    const [items, setItems] = useState<QuoteItem[]>([]);
 
     const [loading, setLoading] = useState(true);
 

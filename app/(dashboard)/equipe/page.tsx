@@ -1,15 +1,21 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
-import { Loader2, User, Shield, Briefcase, Mail, Check, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { User } from "@supabase/supabase-js";
+import { Loader2, User as UserIcon, Shield } from "lucide-react";
+
+interface Profile {
+  id: string;
+  full_name: string | null;
+  role: string;
+  created_at: string;
+}
 
 export default function TeamPage() {
-  const [profiles, setProfiles] = useState<any[]>([]);
+  const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
-  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
 
   useEffect(() => {
     async function fetchData() {
@@ -58,7 +64,7 @@ export default function TeamPage() {
         <div className="bg-zinc-900/50 border border-white/5 rounded-xl overflow-hidden">
             <div className="p-6 border-b border-white/5 flex justify-between items-center">
                 <h3 className="font-bold text-white flex items-center gap-2">
-                    <User size={18} /> Membros ({profiles.length})
+                    <UserIcon size={18} /> Membros ({profiles.length})
                 </h3>
             </div>
             
@@ -67,7 +73,7 @@ export default function TeamPage() {
                     <div key={profile.id} className="p-4 flex items-center justify-between hover:bg-white/5 transition-colors">
                         <div className="flex items-center gap-4">
                             <div className="w-10 h-10 rounded-full bg-linear-to-br from-pink-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg">
-                                {profile.full_name?.charAt(0) || <User size={18}/>}
+                                {profile.full_name?.charAt(0) || <UserIcon size={18}/>}
                             </div>
                             <div>
                                 <p className="font-medium text-white">{profile.full_name || 'Usuário Sem Nome'}</p>
@@ -102,7 +108,7 @@ export default function TeamPage() {
              Para adicionar novos membros, peça para eles se cadastrarem no link <code>/cadastro</code>.
              Eles entrarão automaticamente como <strong>Admin</strong> (por enquanto) e você poderá ajustar o cargo aqui.
              <br/>
-             <em>(Recomendação: Ajuste o Trigger do banco de dados para 'employee' como padrão se preferir segurança maior)</em>
+              <em>(Recomendação: Ajuste o Trigger do banco de dados para &apos;employee&apos; como padrão se preferir segurança maior)</em>
          </div>
 
     </div>

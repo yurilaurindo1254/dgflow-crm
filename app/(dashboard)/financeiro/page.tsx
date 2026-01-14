@@ -150,16 +150,16 @@ export default function FinancePage() {
       {/* Header with Title and Month Selector */}
       <div className="flex flex-col space-y-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-white">Financeiro</h1>
-          <p className="text-zinc-400">Controle suas receitas, despesas e contas</p>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">Financeiro</h1>
+          <p className="text-sm text-zinc-400">Controle suas receitas, despesas e contas</p>
         </div>
 
         <div className="flex flex-wrap items-center gap-4">
-          <div className="flex items-center bg-zinc-900 border border-white/10 rounded-xl p-1">
+          <div className="flex items-center bg-zinc-900 border border-white/10 rounded-xl p-1 w-full sm:w-auto justify-between">
             <Button variant="ghost" size="icon" onClick={prevMonth} className="text-zinc-400 hover:text-white">
               <ChevronLeft size={20} />
             </Button>
-            <div className="px-4 flex items-center gap-2 text-zinc-200 font-medium min-w-[160px] justify-center">
+            <div className="px-4 flex items-center gap-2 text-zinc-200 font-medium min-w-[140px] justify-center text-sm">
               <CalendarIcon size={16} className="text-zinc-500" />
               {capitalizedMonth}
             </div>
@@ -168,24 +168,20 @@ export default function FinancePage() {
             </Button>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 w-full sm:w-auto">
             <Button 
               onClick={() => openModal(<NewTransactionModal type="income" />)}
-              className="h-12 px-6 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 font-black gap-3 hover:bg-emerald-500/20 hover:border-emerald-500/50 hover:shadow-[0_0_25px_rgba(16,185,129,0.15)] transition-all duration-300 active:scale-95 group"
+              className="flex-1 sm:flex-none h-11 px-4 sm:px-6 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 font-bold gap-2 hover:bg-emerald-500/20 hover:border-emerald-500/50 transition-all active:scale-95 group"
             >
-              <div className="p-1.5 bg-emerald-500/10 rounded-lg group-hover:scale-110 transition-transform">
-                <ArrowUpRight size={20} />
-              </div>
-              <span className="tracking-tight">Venda Rápida</span>
+              <ArrowUpRight size={18} className="group-hover:scale-110 transition-transform" />
+              <span className="text-xs sm:text-sm tracking-tight">Venda Rápida</span>
             </Button>
             <Button 
                onClick={() => openModal(<NewTransactionModal type="expense" />)}
-              className="h-12 px-6 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-500 font-black gap-3 hover:bg-rose-500/20 hover:border-rose-500/50 hover:shadow-[0_0_25px_rgba(244,63,94,0.15)] transition-all duration-300 active:scale-95 group"
+              className="flex-1 sm:flex-none h-11 px-4 sm:px-6 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-500 font-bold gap-2 hover:bg-rose-500/20 hover:border-rose-500/50 transition-all active:scale-95 group"
             >
-              <div className="p-1.5 bg-rose-500/10 rounded-lg group-hover:scale-110 transition-transform">
-                <ArrowDownRight size={20} />
-              </div>
-              <span className="tracking-tight">Despesa Rápida</span>
+              <ArrowDownRight size={18} className="group-hover:scale-110 transition-transform" />
+              <span className="text-xs sm:text-sm tracking-tight">Despesa Rápida</span>
             </Button>
           </div>
         </div>
@@ -193,20 +189,20 @@ export default function FinancePage() {
 
       {/* Tabs */}
       <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="bg-zinc-900/50 border border-white/5 p-1 rounded-xl h-auto flex-wrap justify-start">
-          <TabsTrigger value="overview" className="data-[state=active]:bg-zinc-800 data-[state=active]:text-white rounded-lg py-2 px-6 gap-2">
+        <TabsList className="bg-zinc-900/50 border border-white/5 p-1 rounded-xl h-auto flex max-w-full overflow-x-auto justify-start custom-scrollbar">
+          <TabsTrigger value="overview" className="data-[state=active]:bg-zinc-800 data-[state=active]:text-white rounded-lg py-2 px-4 sm:px-6 gap-2 shrink-0">
             <Loader2 size={16} className={cn(loading && "animate-spin")} />
             Visão Geral
           </TabsTrigger>
-          <TabsTrigger value="receivables" className="data-[state=active]:bg-zinc-800 data-[state=active]:text-white rounded-lg py-2 px-6 gap-2">
+          <TabsTrigger value="receivables" className="data-[state=active]:bg-zinc-800 data-[state=active]:text-white rounded-lg py-2 px-4 sm:px-6 gap-2 shrink-0">
             <ArrowUpRight size={16} />
             Receber
           </TabsTrigger>
-          <TabsTrigger value="payables" className="data-[state=active]:bg-zinc-800 data-[state=active]:text-white rounded-lg py-2 px-6 gap-2">
+          <TabsTrigger value="payables" className="data-[state=active]:bg-zinc-800 data-[state=active]:text-white rounded-lg py-2 px-4 sm:px-6 gap-2 shrink-0">
             <ArrowDownRight size={16} />
             Pagar
           </TabsTrigger>
-          <TabsTrigger value="clients" className="data-[state=active]:bg-zinc-800 data-[state=active]:text-white rounded-lg py-2 px-6 gap-2">
+          <TabsTrigger value="clients" className="data-[state=active]:bg-zinc-800 data-[state=active]:text-white rounded-lg py-2 px-4 sm:px-6 gap-2 shrink-0">
             <Users size={16} />
             Clientes
           </TabsTrigger>
@@ -307,7 +303,7 @@ export default function FinancePage() {
             {/* Filters Row */}
             <div className="flex flex-wrap items-center gap-3">
               <Select value={filterStatus} onValueChange={setFilterStatus}>
-                <SelectTrigger className="w-[140px] bg-zinc-900 border-white/10 rounded-xl px-3 py-2 h-10 text-zinc-200">
+                <SelectTrigger className="w-full sm:w-[140px] bg-zinc-900 border-white/10 rounded-xl px-3 py-2 h-10 text-zinc-200">
                   <SelectValue placeholder="Filtrar" />
                 </SelectTrigger>
                 <SelectContent className="bg-zinc-950 border-white/10">
@@ -318,7 +314,7 @@ export default function FinancePage() {
               </Select>
 
               <Select value={filterCategory} onValueChange={setFilterCategory}>
-                <SelectTrigger className="w-[160px] bg-zinc-900 border-white/10 rounded-xl px-3 py-2 h-10 text-zinc-200">
+                <SelectTrigger className="w-full sm:w-[160px] bg-zinc-900 border-white/10 rounded-xl px-3 py-2 h-10 text-zinc-200">
                   <SelectValue placeholder="Categorias" />
                 </SelectTrigger>
                 <SelectContent className="bg-zinc-950 border-white/10">
@@ -333,23 +329,25 @@ export default function FinancePage() {
                   <Button
                     variant="outline"
                     className={cn(
-                      "w-[240px] justify-start text-left font-normal bg-zinc-900 border-white/10 rounded-xl h-10 text-zinc-200 hover:bg-zinc-800",
+                      "w-full sm:w-[240px] justify-start text-left font-normal bg-zinc-900 border-white/10 rounded-xl h-10 text-zinc-200 hover:bg-zinc-800",
                       !dateRange.from && "text-muted-foreground"
                     )}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {dateRange.from ? (
-                      dateRange.to ? (
-                        <>
-                          {format(dateRange.from, "dd/MM/yy")} -{" "}
-                          {format(dateRange.to, "dd/MM/yy")}
-                        </>
+                    <span className="truncate">
+                      {dateRange.from ? (
+                        dateRange.to ? (
+                          <>
+                            {format(dateRange.from, "dd/MM/yy")} -{" "}
+                            {format(dateRange.to, "dd/MM/yy")}
+                          </>
+                        ) : (
+                          format(dateRange.from, "dd/MM/yy")
+                        )
                       ) : (
-                        format(dateRange.from, "dd/MM/yy")
-                      )
-                    ) : (
-                      <span>Selecionar período</span>
-                    )}
+                        <span>Selecionar período</span>
+                      )}
+                    </span>
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0 bg-zinc-950 border-white/10" align="start">
@@ -368,8 +366,8 @@ export default function FinancePage() {
             </div>
 
             {/* Table Area */}
-            <div className="bg-zinc-900/30 border border-white/5 rounded-2xl overflow-hidden min-h-[300px]">
-               <Table>
+            <div className="bg-zinc-900/30 border border-white/5 rounded-2xl overflow-x-auto custom-scrollbar min-h-[300px]">
+               <Table className="min-w-[700px] sm:min-w-full">
                  <TableHeader className="bg-zinc-900/50">
                     <TableRow className="border-white/5 hover:bg-transparent">
                         <TableHead className="text-zinc-400 font-bold">Resumo</TableHead>

@@ -73,7 +73,7 @@ export function NewBriefingModal() {
   const [activeTab, setActiveTab] = useState<'my-templates' | 'standard'>('standard');
   const [selectedType, setSelectedType] = useState<string | null>(null);
   const [customTemplates, setCustomTemplates] = useState<CustomTemplate[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading] = useState(false);
 
   // Load custom templates on mount
   useEffect(() => {
@@ -198,7 +198,7 @@ export function NewBriefingModal() {
             <button
                 onClick={handleContinue}
                 disabled={!selectedType || loading}
-                className="bg-primary-500 hover:bg-[#65a30d] disabled:opacity-50 disabled:cursor-not-allowed text-black px-6 py-2 rounded-lg font-bold text-sm transition-colors flex items-center gap-2"
+                className="bg-primary-500 hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed text-black px-6 py-2 rounded-lg font-bold text-sm transition-colors flex items-center gap-2"
             >
                 {loading ? "Carregando..." : "Continuar"}
             </button>

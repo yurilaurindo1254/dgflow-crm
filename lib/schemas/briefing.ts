@@ -3,9 +3,7 @@ import { z } from "zod";
 export const questionSchema = z.object({
   id: z.string().optional(),
   text: z.string().min(3, "A pergunta deve ter pelo menos 3 caracteres."),
-  type: z.enum(["text", "paragraph", "select", "multiselect"], {
-    required_error: "Selecione o tipo de resposta.",
-  }),
+  type: z.enum(["text", "paragraph", "select", "multiselect"]),
   options: z.array(z.string()).optional(), // For select/multiselect
   required: z.boolean().default(false),
   placeholder: z.string().optional(),

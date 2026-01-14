@@ -1,10 +1,13 @@
 "use client";
 
+import { useSettings } from "@/contexts/settings-context";
+import { formatCurrency as formatCurrencyUtil } from "@/lib/utils/format";
 import { Target } from "lucide-react";
 
 export function RevenueGoal({ current, target }: { current: number, target: number }) {
+    const { t, language, currency } = useSettings();
     const progress = Math.min((current / target) * 100, 100);
-    const formatCurrency = (val: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
+    const formatCurrency = (val: number) => formatCurrencyUtil(val, currency, language);
 
     return (
         <div className="bg-transparent border-0 p-6 relative overflow-hidden">
@@ -14,9 +17,9 @@ export function RevenueGoal({ current, target }: { current: number, target: numb
              <div className="flex items-center justify-between mb-4 relative z-10">
                  <div className="flex items-center gap-2">
                      <Target size={18} className="text-primary-500" />
-                     <h3 className="text-sm font-bold text-white uppercase tracking-wide">Meta de Receita</h3>
+                     <h3 className="text-sm font-bold text-white uppercase tracking-wide">{t('dashboard.revenue_goal')}</h3>
                  </div>
-                 <span className="text-xs text-zinc-400 font-medium tracking-wide">Progresso do mês atual</span>
+                 <span className="text-xs text-zinc-400 font-medium tracking-wide">{t('dashboard.current_month_progress')}</span>
              </div>
 
              <div className="relative z-10">
@@ -36,8 +39,8 @@ export function RevenueGoal({ current, target }: { current: number, target: numb
                  </div>
                  
                  <div className="flex justify-between mt-2 text-xs text-zinc-500">
-                     <span>{progress.toFixed(0)}% alcançado</span>
-                     <span>Faltam {formatCurrency(target - current)}</span>
+                     <span>{progress.toFixed(0)}% {t('dashboard.reached')}</span>
+                     <span>{t('dashboard.remaining')} {formatCurrency(target - current)}</span>
                  </div>
              </div>
         </div>

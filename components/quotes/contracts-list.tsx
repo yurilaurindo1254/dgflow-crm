@@ -24,8 +24,8 @@ export function ContractsList() {
   const [loading, setLoading] = useState(true);
   const { openModal } = useModal();
 
-  const fetchContracts = useCallback(async () => {
-      setLoading(true);
+  const fetchContracts = useCallback(async (showLoading = false) => {
+      if (showLoading) setLoading(true);
       const { data, error } = await supabase
         .from('contratos')
         .select(`
@@ -45,7 +45,7 @@ export function ContractsList() {
   }, []);
 
   useEffect(() => {
-      fetchContracts();
+      fetchContracts(); 
   }, [fetchContracts]);
 
   const handleView = (contract: Contract) => {

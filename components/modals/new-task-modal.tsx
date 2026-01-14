@@ -2,7 +2,7 @@
 
 import { Modal } from "@/components/ui/modal";
 import { useState, useEffect } from "react";
-import { AlignLeft, Paperclip, Plus } from "lucide-react";
+import { AlignLeft } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useModal } from "@/contexts/modal-context";
 import { Button } from "@/components/ui/button";

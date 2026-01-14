@@ -86,7 +86,7 @@ export default function RegisterPage() {
             </div>
             <h1 className="text-2xl font-bold text-white mb-2">Conta da Organização</h1>
             <p className="text-zinc-400 text-sm">Criar conta para Dono ou Funcionário.</p>
-            <p className="text-zinc-500 text-xs mt-2">É um cliente? <a href="#" className="underline hover:text-primary-500">Acesse o portal do cliente.</a></p>
+            <p className="text-zinc-500 text-xs mt-2">É um cliente? <Link href="/portal" className="underline hover:text-primary-500">Acesse o portal do cliente.</Link></p>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">

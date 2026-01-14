@@ -1,125 +1,159 @@
 "use client";
 
-import { useState } from "react";
-import { Plus, Package, FileText, Lightbulb } from "lucide-react";
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { Plus, Search, Package, Filter } from "lucide-react";
 import { useModal } from "@/contexts/modal-context";
 import { NewServiceModal } from "@/components/modals/new-service-modal";
 import { supabase } from "@/lib/supabase";
-import { useEffect } from "react";
-import Link from "next/link";
-
-interface Service {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  category: string;
-  is_recurring: boolean;
-  recurring_period: string;
-}
+import { ServiceCard, Service } from "@/components/services/service-card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function ServicesPage() {
   const { openModal } = useModal();
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  // Estados de Filtro
+  const [search, setSearch] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("all");
 
-  useEffect(() => {
-    async function fetchServices() {
-      const { data } = await supabase.from("services").select("*").order('created_at', { ascending: false });
-      if (data) setServices(data);
+  const fetchServices = useCallback(async (showLoading = false) => {
+    if (showLoading) setLoading(true);
+    try {
+      const { data, error } = await supabase.from("services").select("*").order('created_at', { ascending: false });
+      if (error) throw error;
+      if (data) setServices(data as Service[]);
+    } catch (error) {
+      console.error("Error fetching services:", error);
+    } finally {
       setLoading(false);
     }
-    fetchServices();
   }, []);
 
+  useEffect(() => {
+    fetchServices(); // loading is already true by default
+  }, [fetchServices]);
+
+  // Ações
+  const handleDelete = async (id: string) => {
+      if(!confirm("Tem certeza que deseja excluir este serviço?")) return;
+      await supabase.from('services').delete().eq('id', id);
+      fetchServices(true); // Refresh with loading state
+  };
+
+  const handleEdit = (service: Service) => {
+      // Mapeia os dados do serviço para o formato que o Modal espera (camelCase vs snake_case)
+      openModal(<NewServiceModal initialValues={{
+          name: service.name,
+          description: service.description,
+          price: service.price,
+          category: service.category,
+          isRecurring: service.is_recurring,
+          recurringPeriod: service.recurring_period
+      }} />);
+  };
+
+  // Lógica de Filtragem
+  const filteredServices = useMemo(() => {
+      return services.filter(service => {
+          const matchesSearch = service.name.toLowerCase().includes(search.toLowerCase()) || 
+                                (service.description?.toLowerCase() || "").includes(search.toLowerCase());
+          const matchesCategory = categoryFilter === 'all' || service.category === categoryFilter;
+          
+          return matchesSearch && matchesCategory;
+      });
+  }, [services, search, categoryFilter]);
+
+  const uniqueCategories = Array.from(new Set(services.map(s => s.category))).filter(Boolean);
+
   return (
-    <div className="p-8 space-y-8 h-full flex flex-col max-w-7xl mx-auto">
+    <div className="p-8 space-y-8 h-full flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-7xl mx-auto w-full">
+      
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-white mb-2">Meus Serviços</h1>
-        <p className="text-zinc-400">
-          Gerencie seu catálogo de serviços e preços
-        </p>
-      </div>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-white tracking-tight">Catálogo de Serviços</h1>
+          <p className="text-zinc-400 mt-1">
+            Gerencie seus produtos, serviços e planos recorrentes.
+          </p>
+        </div>
 
-      {/* Actions Bar (Matches Screenshot 4) */}
-      <div className="flex gap-4">
-          <Link href="/orcamentos">
-            <button className="flex items-center gap-2 bg-transparent border border-pink-500/30 text-pink-500 hover:bg-pink-500/10 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-                <FileText size={16} />
-                Novo Orçamento
-            </button>
-          </Link>
-        <button
+        <Button
           onClick={() => openModal(<NewServiceModal />)}
-          className="flex items-center gap-2 bg-linear-to-r from-pink-500 to-orange-500 hover:opacity-90 text-white px-4 py-2 rounded-lg text-sm shadow-lg shadow-pink-500/20 transition-all font-bold"
+          className="bg-primary-500 hover:bg-primary-600 text-black font-bold shadow-lg shadow-primary-500/20"
         >
-          <Plus size={16} />
+          <Plus size={18} className="mr-2" />
           Novo Serviço
-        </button>
+        </Button>
       </div>
 
-      {/* Content Area */}
-      {services.length === 0 && !loading ? (
-          <div className="flex-1 flex items-center justify-center bg-zinc-900 border border-white/10 rounded-xl min-h-[400px]">
-            <div className="text-center">
-                <div className="w-20 h-20 bg-zinc-800 rounded-3xl flex items-center justify-center mx-auto mb-6 text-zinc-500">
-                    <Package size={40} />
-                </div>
-                <h3 className="text-white font-bold text-xl mb-2">
-                    Nenhum serviço cadastrado ainda.
-                </h3>
-                  <p className="text-zinc-400 text-sm mb-8">
-                    Comece adicionando seu primeiro serviço ou escolha um modelo pronto.
-                </p>
-                <div className="flex gap-4 justify-center">
-                    <button
-                         onClick={() => openModal(<NewServiceModal />)}
-                         className="px-6 py-3 rounded-xl border border-white/10 hover:bg-white/5 text-zinc-300 font-bold transition-all flex items-center gap-2"
-                    >
-                        <Lightbulb size={20} className="text-primary-500" />
-                        Ver Sugestões
-                    </button>
-                    <button
-                        onClick={() => openModal(<NewServiceModal />)}
-                        className="bg-linear-to-r from-pink-500 to-orange-500 hover:opacity-90 text-white px-8 py-3 rounded-xl font-bold shadow-lg shadow-pink-500/20 transition-all inline-flex items-center gap-2 text-lg"
-                    >
-                        <Plus size={20} />
-                        Novo Serviço
-                    </button>
-                </div>
-            </div>
+      {/* Toolbar */}
+      <div className="flex flex-col sm:flex-row gap-4 bg-zinc-900/40 p-1.5 rounded-xl border border-white/5">
+         <div className="relative flex-1">
+             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={16} />
+             <Input 
+                placeholder="Buscar serviços..." 
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-9 bg-transparent border-transparent focus-visible:ring-0 placeholder:text-zinc-600 h-10 text-white"
+             />
+         </div>
+         
+         <div className="h-6 w-px bg-white/10 hidden sm:block self-center" />
+         
+         <div className="w-full sm:w-[200px]">
+            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                <SelectTrigger className="bg-transparent border-transparent h-10 focus:ring-0 text-zinc-300">
+                    <div className="flex items-center gap-2">
+                        <Filter size={14} className="text-zinc-500" />
+                        <SelectValue placeholder="Categoria" />
+                    </div>
+                </SelectTrigger>
+                <SelectContent className="bg-zinc-900 border-white/10 text-white">
+                    <SelectItem value="all">Todas Categorias</SelectItem>
+                    {uniqueCategories.map(cat => (
+                        <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                    ))}
+                </SelectContent>
+            </Select>
+         </div>
+      </div>
+
+      {/* Grid Content */}
+      {loading ? (
+           <div className="flex-1 flex items-center justify-center text-zinc-500">Carregando catálogo...</div>
+      ) : filteredServices.length === 0 ? (
+          <div className="flex-1 flex flex-col items-center justify-center min-h-[400px] border border-dashed border-white/10 rounded-2xl bg-zinc-900/20">
+              <div className="w-16 h-16 bg-zinc-800/50 rounded-full flex items-center justify-center mb-4 text-zinc-600">
+                  <Package size={32} />
+              </div>
+              <h3 className="text-lg font-medium text-white mb-1">Nenhum serviço encontrado</h3>
+              <p className="text-sm text-zinc-500 max-w-sm text-center">
+                  {search ? `Não encontramos nada para "${search}".` : "Comece adicionando seus serviços ou pacotes."}
+              </p>
+              {search && (
+                  <Button variant="link" onClick={() => setSearch("")} className="text-primary-500 mt-2">
+                      Limpar busca
+                  </Button>
+              )}
           </div>
       ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {services.map((service) => (
-              <div
-                key={service.id}
-                className="bg-zinc-900/50 backdrop-blur-sm p-6 rounded-xl border border-white/5 hover:border-pink-500/30 transition-all group hover:-translate-y-1"
-              >
-                <div className="flex justify-between items-start mb-4">
-                    <div className="p-3 rounded-lg bg-zinc-800 text-pink-500">
-                        <Package size={24} />
-                    </div>
-                     <span className="text-xs font-bold px-2 py-1 rounded-full bg-white/5 text-zinc-400 border border-white/5 uppercase tracking-wider">
-                        {service.category || 'Geral'}
-                    </span>
-                </div>
-                
-                <h3 className="text-white font-bold text-lg mb-2">{service.name}</h3>
-                <p className="text-zinc-400 text-sm line-clamp-2 mb-4 h-10">{service.description}</p>
-                
-                <div className="pt-4 border-t border-white/5 flex items-center justify-between">
-                    <div>
-                         <span className="text-xl font-bold text-white">
-                            R$ {service.price?.toLocaleString('pt-BR')}
-                        </span>
-                        {service.is_recurring && (
-                            <span className="text-xs text-zinc-500 ml-1">/{service.recurring_period?.toLowerCase()}</span>
-                        )}
-                    </div>
-                </div>
-              </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {filteredServices.map((service: Service) => (
+              <ServiceCard 
+                key={service.id} 
+                service={service} 
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+              />
             ))}
           </div>
       )}

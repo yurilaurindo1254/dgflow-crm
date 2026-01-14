@@ -62,8 +62,8 @@ export function PayablesView({ month }: PayablesViewProps) {
   }
 
   return (
-    <div className="bg-zinc-900/30 border border-white/5 rounded-2xl overflow-hidden mt-6">
-      <Table>
+    <div className="bg-zinc-900/30 border border-white/5 rounded-2xl overflow-x-auto custom-scrollbar mt-6">
+      <Table className="min-w-[700px] sm:min-w-full">
         <TableHeader className="bg-zinc-900/50">
           <TableRow className="border-white/5 hover:bg-transparent">
             <TableHead className="text-zinc-400 font-bold">Fornecedor / Descrição</TableHead>

@@ -2,7 +2,7 @@
 
 import { Modal } from "@/components/ui/modal";
 import { useState } from "react";
-import { Package, DollarSign, Lightbulb } from "lucide-react";
+import { Package, DollarSign, Lightbulb, Loader2 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useModal } from "@/contexts/modal-context";
 import { useForm, Controller, useWatch } from "react-hook-form";
@@ -12,8 +12,8 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Loader2 } from "lucide-react";
 import { ServiceSuggestionsModal, type Suggestion } from "./service-suggestions-modal";
+import { useRouter } from "next/navigation";
 
 interface NewServiceModalProps {
     initialValues?: Partial<ServiceFormValues>;
@@ -22,6 +22,7 @@ interface NewServiceModalProps {
 export function NewServiceModal({ initialValues }: NewServiceModalProps) {
   const { closeModal, openModal } = useModal();
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   const form = useForm<ServiceFormValues>({
     resolver: zodResolver(serviceSchema),
@@ -37,8 +38,9 @@ export function NewServiceModal({ initialValues }: NewServiceModalProps) {
     }
   });
 
-  const { register, control, handleSubmit, setValue, formState: { errors }, watch } = form; // Added watch here if needed
+  const { register, control, handleSubmit, formState: { errors } } = form;
   const isRecurring = useWatch({ control, name: "isRecurring" });
+  const recurringPeriod = useWatch({ control, name: "recurringPeriod" });
 
   const handleOpenSuggestions = () => {
       openModal(
@@ -84,7 +86,7 @@ export function NewServiceModal({ initialValues }: NewServiceModalProps) {
     setLoading(false);
     if (!error) {
         closeModal();
-        window.location.reload(); 
+        router.refresh(); 
     } else {
         alert('Erro ao criar serviço');
         console.error(error);
@@ -148,9 +150,9 @@ export function NewServiceModal({ initialValues }: NewServiceModalProps) {
                         <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={16} />
                         {isRecurring && (
                             <div className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 text-sm font-medium bg-zinc-900 px-2 py-1 rounded">
-                                /{form.watch("recurringPeriod") === 'Mensal' ? 'mês' : 
-                                  form.watch("recurringPeriod") === 'Anual' ? 'ano' : 
-                                  form.watch("recurringPeriod")?.toLowerCase() || 'período'}
+                                /{recurringPeriod === 'Mensal' ? 'mês' : 
+                                  recurringPeriod === 'Anual' ? 'ano' : 
+                                  recurringPeriod?.toLowerCase() || 'período'}
                             </div>
                         )}
                     </div>

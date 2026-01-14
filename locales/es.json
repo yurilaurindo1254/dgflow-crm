@@ -1,0 +1,49 @@
+{
+  "dashboard": {
+    "title": "Panel de Control",
+    "welcome": "Bienvenido de nuevo, aquí está el resumen de su negocio.",
+    "monthly_revenue": "Ingresos Mensuales",
+    "expenses": "Gastos",
+    "new_leads": "Nuevos Leads",
+    "net_profit": "Beneficio Neto",
+    "conversion": "Conversión",
+    "active_projects": "En Progreso",
+    "projects": "Proyectos",
+    "recent_projects": "Proyectos Recientes",
+    "recent_activity": "Actividad Reciente",
+    "analysis": "Análisis Financiero Consolidado",
+    "analysis_desc": "Rendimiento de ingresos y gastos en los últimos 6 meses",
+    "syncing": "Sincronizando datos...",
+    "everything_up_to_date": "¡Todo al día!",
+    "no_projects": "No hay proyectos en curso",
+    "revenue_goal": "Meta de Ingresos",
+    "current_month_progress": "Progreso del mes actual",
+    "reached": "alcanzado",
+    "remaining": "Faltan"
+  },
+  "sidebar": {
+    "dashboard": "Panel de Control",
+    "pipelines": "Pipelines",
+    "projects": "Proyectos",
+    "clients": "Clientes",
+    "finance": "Financiero",
+    "agenda": "Agenda",
+    "services": "Servicios",
+    "quotes": "Presupuestos",
+    "briefings": "Briefings",
+    "performance": "Performance",
+    "link_bio": "Enlace en Bio",
+    "team": "Equipo",
+    "settings": "Configuración"
+  },
+  "common": {
+    "loading": "Cargando...",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "create": "Crear",
+    "search": "Buscar...",
+    "filter": "Filtrar"
+  }
+}

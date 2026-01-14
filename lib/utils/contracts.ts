@@ -1,6 +1,6 @@
 import { supabase } from "@/lib/supabase";
 
-import { Quote } from "../schemas/quote";
+import { Quote, QuoteItem } from "../schemas/quote";
 
 export interface ClientData {
     id: string;
@@ -15,7 +15,7 @@ export interface ClientData {
 
 // Helper to get template and generate content string WITHOUT saving
 export async function getContractPreview({ quote, overrides }: { 
-    quote: Partial<Quote> & { clients?: ClientData | any },
+    quote: Partial<Quote> & { clients?: ClientData },
     overrides?: {
         paymentMethod?: string;
         installments?: string;
@@ -62,7 +62,7 @@ export async function getContractPreview({ quote, overrides }: {
         if (overrides?.services) {
             content = content.replace(/{{Serviços Inclusos}}/g, overrides.services);
         } else if (quote.itens && Array.isArray(quote.itens)) {
-             const servicesList = (quote.itens as any[]).map((i: any) => `${i.nome_item} (${i.quantidade}x)`).join(', ');
+             const servicesList = (quote.itens as QuoteItem[]).map((i: QuoteItem) => `${i.nome_item} (${i.quantidade}x)`).join(', ');
              content = content.replace(/{{Serviços Inclusos}}/g, servicesList);
         } else {
              content = content.replace(/{{Serviços Inclusos}}/g, "Ver proposta anexa");
@@ -88,7 +88,7 @@ export async function getContractPreview({ quote, overrides }: {
 }
 
 // Main function to Generate and SAVE
-export async function generateContract({ quote, onUpdate }: { quote: Quote & { clients?: any }, onUpdate?: () => void }) {
+export async function generateContract({ quote, onUpdate }: { quote: Quote & { clients?: ClientData }, onUpdate?: () => void }) {
     try {
         // Check existing
         const { data: existing } = await supabase

@@ -2,7 +2,7 @@
 
 import { Modal } from "@/components/ui/modal";
 import { useState } from "react";
-import { Wallet, Plus, User, Package, Clock, CalendarIcon } from "lucide-react";
+import { Plus, User, Clock, CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
 import { useModal } from "@/contexts/modal-context";

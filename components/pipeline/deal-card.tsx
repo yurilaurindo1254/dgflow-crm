@@ -15,6 +15,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import { useModal } from "@/contexts/modal-context";
+import { EditDealModal } from "@/components/modals/edit-deal-modal";
 
 export interface Deal {
   id: string;
@@ -35,6 +37,7 @@ interface DealCardProps {
 }
 
 export function DealCard({ deal }: DealCardProps) {
+  const { openModal } = useModal();
   const {
     attributes,
     listeners,
@@ -83,7 +86,9 @@ export function DealCard({ deal }: DealCardProps) {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem>Editar</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => openModal(<EditDealModal deal={deal} />)}>
+                  Editar
+                </DropdownMenuItem>
                 <DropdownMenuItem>Mover</DropdownMenuItem>
                 <DropdownMenuItem className="text-destructive">Perdido</DropdownMenuItem>
               </DropdownMenuContent>

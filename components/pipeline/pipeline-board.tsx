@@ -148,7 +148,7 @@ export function PipelineBoard({ searchQuery = "", filters = {}, onlyMyDeals = fa
   }
 
   return (
-      <div className="flex gap-6 h-full min-w-full w-max px-4 pb-4">
+      <div className="flex gap-4 overflow-x-auto pb-6 scroll-smooth custom-scrollbar snap-x snap-mandatory md:snap-none">
         <DndContext
           sensors={sensors}
           collisionDetection={closestCorners}

@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   description: 'Gerencie seu negócio criativo em um só lugar.',
 };
 
+import { SettingsProvider } from '@/contexts/settings-context';
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -18,9 +20,11 @@ export default function RootLayout({
   return (
     <html lang="pt-BR" className="dark">
       <body className={`${inter.className} bg-black text-white`}>
-        <ModalProvider>
-            {children}
-        </ModalProvider>
+        <SettingsProvider>
+            <ModalProvider>
+                {children}
+            </ModalProvider>
+        </SettingsProvider>
       </body>
     </html>
   );

@@ -5,7 +5,7 @@ import {
     Search, Plus, Mail, Phone, MoreHorizontal, Filter, 
     Edit, Trash2, LayoutGrid, List, 
     Clock, MessageSquare,
-    ChevronRight, Download, FileText
+    ChevronRight, Download, FileText, Users
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
@@ -69,6 +69,8 @@ export default function ClientsPage() {
     const [isDeleting, setIsDeleting] = useState(false);
     const [clientToDelete, setClientToDelete] = useState<Client | null>(null);
 
+    const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'lead' | 'churn'>('all');
+
     const fetchClients = useCallback(async () => {
         setLoading(true);
         try {
@@ -112,6 +114,11 @@ export default function ClientsPage() {
                     .order('name');
 
                 if (clientsError) throw clientsError;
+
+                if (!clientsData || clientsData.length === 0) {
+                    setClients([]);
+                    return;
+                }
 
                 const enriched = await Promise.all(clientsData.map(async (client: Omit<DBClient, 'tasks' | 'orcamentos'>) => {
                     const { data: tasks } = await supabase.from('tasks').select('status, updated_at').eq('client_id', client.id);
@@ -176,13 +183,56 @@ export default function ClientsPage() {
         fetchClients();
     }, [fetchClients]);
 
-    const filteredClients = clients.filter(client => 
-        client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        client.company?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        client.email.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredClients = clients.filter(client => {
+        const matchesSearch = client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                             client.company?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                             client.email.toLowerCase().includes(searchTerm.toLowerCase());
+        
+        const matchesStatus = statusFilter === 'all' || client.status === statusFilter;
+        
+        return matchesSearch && matchesStatus;
+    });
 
     const formatCurrency = (val: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
+
+    const handleWhatsApp = (phone: string) => {
+        const cleanPhone = phone.replace(/\D/g, '');
+        window.open(`https://wa.me/${cleanPhone}`, '_blank');
+    };
+
+    const handleEmail = (email: string) => {
+        window.location.href = `mailto:${email}`;
+    };
+
+    const handleExportCSV = () => {
+        if (filteredClients.length === 0) return;
+        
+        const headers = ["Nome", "Empresa", "Email", "Telefone", "Status", "LTV", "Projetos Ativos"];
+        const rows = filteredClients.map(c => [
+            c.name,
+            c.company || "-",
+            c.email,
+            c.phone,
+            c.status,
+            c.ltv,
+            c.activeProjects
+        ]);
+
+        const csvContent = [
+            headers.join(","),
+            ...rows.map(r => r.join(","))
+        ].join("\n");
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        const url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        link.setAttribute("download", `clientes_dgflow_${new Date().toISOString().split('T')[0]}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
 
     const handleOpenDetails = (client: Client) => {
         setSelectedClient(client);
@@ -213,10 +263,10 @@ export default function ClientsPage() {
     return (
         <div className="space-y-8 pb-20">
             {/* Header Area */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 px-1">
                 <div>
-                    <h2 className="text-4xl font-extrabold text-white tracking-tight">Gestão de Clientes</h2>
-                    <p className="text-zinc-400 font-medium">CRM Integrado • Acompanhe o valor e a saúde da sua base.</p>
+                    <h2 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">Gestão de Clientes</h2>
+                    <p className="text-zinc-400 text-sm sm:text-base font-medium">CRM Integrado • Acompanhe o valor e a saúde da sua base.</p>
                 </div>
                 <div className="flex items-center gap-3">
                     <div className="bg-zinc-900/50 p-1 rounded-xl border border-white/5 flex">
@@ -255,11 +305,26 @@ export default function ClientsPage() {
                         className="w-full bg-zinc-950/50 border-none rounded-xl pl-12 pr-4 py-3 text-sm text-white placeholder:text-zinc-600 focus:ring-2 focus:ring-primary-500/50 transition-all"
                     />
                 </div>
-                <div className="flex gap-2">
-                    <Button variant="outline" className="border-white/10 bg-zinc-900/50 hover:bg-white/5 rounded-xl h-12 px-5 text-zinc-300">
-                        <Filter className="mr-2 h-4 w-4" /> Filtros
-                    </Button>
-                    <Button variant="outline" className="border-white/10 bg-zinc-900/50 hover:bg-white/5 rounded-xl h-12 px-4">
+                <div className="flex gap-2 w-full sm:w-auto">
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="outline" className="flex-1 sm:flex-none border-white/10 bg-zinc-900/50 hover:bg-white/5 rounded-xl h-12 px-5 text-zinc-300">
+                                <Filter className="mr-2 h-4 w-4" /> 
+                                {statusFilter === 'all' ? 'Status' : statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1)}
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="bg-zinc-950 border-white/10 text-white">
+                            <DropdownMenuItem onClick={() => setStatusFilter('all')}>Todos</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setStatusFilter('active')}>Ativo</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setStatusFilter('lead')}>Lead</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setStatusFilter('churn')}>Churn</DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                    <Button 
+                        variant="outline" 
+                        onClick={handleExportCSV}
+                        className="border-white/10 bg-zinc-900/50 hover:bg-white/5 rounded-xl h-12 px-4 text-zinc-300"
+                    >
                         <Download className="h-4 w-4" />
                     </Button>
                 </div>
@@ -273,89 +338,113 @@ export default function ClientsPage() {
                 </div>
             ) : viewMode === 'grid' ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                    {filteredClients.map((client) => (
-                        <Card key={client.id} className="group relative overflow-hidden bg-zinc-900/40 border-white/5 hover:border-primary-500/30 transition-all duration-500 hover:shadow-2xl hover:-translate-y-1">
-                            {/* Decorative Glow */}
-                            <div className="absolute top-0 right-0 w-32 h-32 bg-primary-500/5 blur-[60px] rounded-full -translate-y-1/2 translate-x-1/2 group-hover:bg-primary-500/10 transition-colors" />
+                    {filteredClients.length > 0 ? (
+                        filteredClients.map((client) => (
+                            <Card key={client.id} className="group relative overflow-hidden bg-zinc-900/40 border-white/5 hover:border-primary-500/30 transition-all duration-500 hover:shadow-2xl hover:-translate-y-1">
+                                {/* Decorative Glow */}
+                                <div className="absolute top-0 right-0 w-32 h-32 bg-primary-500/5 blur-[60px] rounded-full -translate-y-1/2 translate-x-1/2 group-hover:bg-primary-500/10 transition-colors" />
 
-                            <div className="p-6 space-y-6">
-                                {/* Header */}
-                                <div className="flex justify-between items-start">
-                                    <div className="flex items-center gap-4">
-                                        <Avatar className="h-14 w-14 border border-white/10 bg-zinc-950 ring-2 ring-primary-500/0 group-hover:ring-primary-500/20 transition-all">
-                                            <AvatarFallback className="text-xl font-bold bg-linear-to-br from-zinc-800 to-zinc-900 text-white">
-                                                {client.name.charAt(0)}
-                                            </AvatarFallback>
-                                        </Avatar>
-                                        <div>
-                                            <h3 className="text-lg font-bold text-white group-hover:text-primary-400 transition-colors uppercase tracking-tight">{client.name}</h3>
-                                            <p className="text-zinc-500 text-sm font-medium">{client.company || 'Particular'}</p>
+                                <div className="p-6 space-y-6">
+                                    {/* Header */}
+                                    <div className="flex justify-between items-start">
+                                        <div className="flex items-center gap-4">
+                                            <Avatar className="h-14 w-14 border border-white/10 bg-zinc-950 ring-2 ring-primary-500/0 group-hover:ring-primary-500/20 transition-all">
+                                                <AvatarFallback className="text-xl font-bold bg-linear-to-br from-zinc-800 to-zinc-900 text-white">
+                                                    {client.name.charAt(0)}
+                                                </AvatarFallback>
+                                            </Avatar>
+                                            <div>
+                                                <h3 className="text-lg font-bold text-white group-hover:text-primary-400 transition-colors uppercase tracking-tight">{client.name}</h3>
+                                                <p className="text-zinc-500 text-sm font-medium">{client.company || 'Particular'}</p>
+                                            </div>
+                                        </div>
+                                        <Badge variant="outline" className={cn(
+                                            "capitalize border-none",
+                                            client.status === 'active' ? "bg-emerald-500/10 text-emerald-500" : "bg-zinc-800 text-zinc-400"
+                                        )}>
+                                            {client.status || 'Ativo'}
+                                        </Badge>
+                                    </div>
+
+                                    {/* Mini Stats Grid */}
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <div className="bg-black/20 rounded-xl p-3 border border-white/5">
+                                            <p className="text-[10px] uppercase font-bold text-zinc-500 tracking-widest mb-1">Lifetime Value</p>
+                                            <p className="text-white font-bold">{formatCurrency(client.ltv)}</p>
+                                        </div>
+                                        <div className="bg-black/20 rounded-xl p-3 border border-white/5">
+                                            <p className="text-[10px] uppercase font-bold text-zinc-500 tracking-widest mb-1">Projetos Ativos</p>
+                                            <p className="text-white font-bold">{client.activeProjects} em curso</p>
                                         </div>
                                     </div>
-                                    <Badge variant="outline" className={cn(
-                                        "capitalize border-none",
-                                        client.status === 'active' ? "bg-emerald-500/10 text-emerald-500" : "bg-zinc-800 text-zinc-400"
-                                    )}>
-                                        {client.status || 'Ativo'}
-                                    </Badge>
-                                </div>
 
-                                {/* Mini Stats Grid */}
-                                <div className="grid grid-cols-2 gap-3">
-                                    <div className="bg-black/20 rounded-xl p-3 border border-white/5">
-                                        <p className="text-[10px] uppercase font-bold text-zinc-500 tracking-widest mb-1">Lifetime Value</p>
-                                        <p className="text-white font-bold">{formatCurrency(client.ltv)}</p>
+                                    {/* Details / Meta */}
+                                    <div className="space-y-2">
+                                        <div className="flex items-center gap-2 text-xs text-zinc-400">
+                                            <Clock size={14} className="text-zinc-600" />
+                                            <span>Visto por último {new Date(client.lastInteraction).toLocaleDateString()}</span>
+                                        </div>
+                                        <div className="flex flex-wrap gap-1.5">
+                                            {client.tags.map(tag => (
+                                                <span key={tag} className="text-[10px] px-2 py-0.5 rounded-full bg-primary-500/5 text-primary-400 border border-primary-500/10">
+                                                    {tag}
+                                                </span>
+                                            ))}
+                                        </div>
                                     </div>
-                                    <div className="bg-black/20 rounded-xl p-3 border border-white/5">
-                                        <p className="text-[10px] uppercase font-bold text-zinc-500 tracking-widest mb-1">Projetos Ativos</p>
-                                        <p className="text-white font-bold">{client.activeProjects} em curso</p>
-                                    </div>
-                                </div>
 
-                                {/* Details / Meta */}
-                                <div className="space-y-2">
-                                    <div className="flex items-center gap-2 text-xs text-zinc-400">
-                                        <Clock size={14} className="text-zinc-600" />
-                                        <span>Visto por último {new Date(client.lastInteraction).toLocaleDateString()}</span>
-                                    </div>
-                                    <div className="flex flex-wrap gap-1.5">
-                                        {client.tags.map(tag => (
-                                            <span key={tag} className="text-[10px] px-2 py-0.5 rounded-full bg-primary-500/5 text-primary-400 border border-primary-500/10">
-                                                {tag}
-                                            </span>
-                                        ))}
+                                    {/* Action Footer */}
+                                    <div className="pt-4 flex items-center gap-2 border-t border-white/5">
+                                        <button 
+                                            onClick={() => handleOpenDetails(client)}
+                                            className="flex-1 bg-zinc-800 hover:bg-zinc-700 text-white border border-white/5 h-9 rounded-lg text-xs font-bold uppercase transition-colors"
+                                        >
+                                            Ver Painel
+                                        </button>
+                                        <Button 
+                                            size="icon" 
+                                            variant="ghost" 
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleWhatsApp(client.phone);
+                                            }}
+                                            className="h-11 w-11 sm:h-9 sm:w-9 text-zinc-500 hover:text-[#25D366] hover:bg-[#25D366]/10"
+                                        >
+                                            <Phone size={20} className="sm:size-[18px]" />
+                                        </Button>
+                                        <Button 
+                                            size="icon" 
+                                            variant="ghost" 
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleEmail(client.email);
+                                            }}
+                                            className="h-11 w-11 sm:h-9 sm:w-9 text-zinc-500 hover:text-primary-400 hover:bg-primary-500/10"
+                                        >
+                                            <Mail size={20} className="sm:size-[18px]" />
+                                        </Button>
+                                        <Button 
+                                            size="icon" 
+                                            variant="ghost" 
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setClientToDelete(client);
+                                            }}
+                                            className="h-11 w-11 sm:h-9 sm:w-9 text-zinc-500 hover:text-red-500 hover:bg-red-500/10"
+                                        >
+                                            <Trash2 size={20} className="sm:size-[18px]" />
+                                        </Button>
                                     </div>
                                 </div>
-
-                                {/* Action Footer */}
-                                <div className="pt-4 flex items-center gap-2 border-t border-white/5">
-                                    <Button 
-                                        onClick={() => handleOpenDetails(client)}
-                                        className="flex-1 bg-zinc-800 hover:bg-zinc-700 text-white border-white/5 h-9 rounded-lg text-xs font-bold uppercase transition-colors"
-                                    >
-                                        Ver Painel
-                                    </Button>
-                                    <Button size="icon" variant="ghost" className="h-9 w-9 text-zinc-500 hover:text-[#25D366] hover:bg-[#25D366]/10">
-                                        <Phone size={18} />
-                                    </Button>
-                                    <Button size="icon" variant="ghost" className="h-9 w-9 text-zinc-500 hover:text-primary-400 hover:bg-primary-500/10">
-                                        <Mail size={18} />
-                                    </Button>
-                                    <Button 
-                                        size="icon" 
-                                        variant="ghost" 
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            setClientToDelete(client);
-                                        }}
-                                        className="h-9 w-9 text-zinc-500 hover:text-red-500 hover:bg-red-500/10"
-                                    >
-                                        <Trash2 size={18} />
-                                    </Button>
-                                </div>
-                            </div>
-                        </Card>
-                    ))}
+                            </Card>
+                        ))
+                    ) : (
+                        <div className="col-span-full py-20 flex flex-col items-center justify-center bg-zinc-900/20 border border-white/5 border-dashed rounded-3xl">
+                            <Users className="h-12 w-12 text-zinc-700 mb-4" />
+                            <p className="text-zinc-500 font-medium text-lg">Nenhum cliente encontrado</p>
+                            <p className="text-zinc-600 text-sm mt-1">Tente ajustar seus filtros ou cadastre um novo cliente.</p>
+                        </div>
+                    )}
                 </div>
             ) : (
                 <div className="bg-zinc-900/40 border border-white/5 rounded-2xl overflow-hidden shadow-2xl backdrop-blur-xl">
@@ -408,8 +497,17 @@ export default function ClientsPage() {
                                                 <DropdownMenuItem onClick={() => handleOpenDetails(client)}>
                                                     <ChevronRight className="mr-2 h-4 w-4" /> Detalhes
                                                 </DropdownMenuItem>
-                                                <DropdownMenuItem>
-                                                    <Phone className="mr-2 h-4 w-4" /> WhatsApp
+                                                <DropdownMenuItem onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleWhatsApp(client.phone);
+                                                }}>
+                                                    <Phone className="mr-2 h-4 w-4 text-[#25D366]" /> WhatsApp
+                                                </DropdownMenuItem>
+                                                <DropdownMenuItem onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleEmail(client.email);
+                                                }}>
+                                                    <Mail className="mr-2 h-4 w-4 text-primary-400" /> Email
                                                 </DropdownMenuItem>
                                                 <DropdownMenuSeparator className="bg-white/5" />
                                                 <DropdownMenuItem 

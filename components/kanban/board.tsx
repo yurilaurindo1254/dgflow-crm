@@ -95,14 +95,15 @@ export function KanbanBoard({ searchQuery = "", showMyTasksOnly = false, priorit
   // --- Handlers de Ação ---
 
   const handleDuplicateTask = async (task: Task) => {
-      const { id, created_at, ...rest } = task;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { id: _, created_at: __, ...rest } = task;
       const newTask = {
           ...rest,
           title: `${task.title} (Cópia)`,
           index_position: tasks.filter(t => t.column_id === task.column_id).length
       };
 
-      const { data, error } = await supabase.from('tasks').insert(newTask).select('*, assignee:profiles(full_name, avatar_url), client:clients(name)').single();
+      const { data } = await supabase.from('tasks').insert(newTask).select('*, assignee:profiles(full_name, avatar_url), client:clients(name)').single();
       
       if (data) {
           setTasks([...tasks, data]);

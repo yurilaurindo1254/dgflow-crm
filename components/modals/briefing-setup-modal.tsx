@@ -11,7 +11,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, Copy, ExternalLink, Check } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 const setupSchema = z.object({
   quoteId: z.string().optional(),
@@ -20,6 +19,18 @@ const setupSchema = z.object({
 });
 
 type SetupFormValues = z.infer<typeof setupSchema>;
+ 
+interface QuoteOption {
+  id: string;
+  titulo: string;
+  client: {
+    name: string | null;
+    email: string | null;
+  } | {
+    name: string | null;
+    email: string | null;
+  }[] | null;
+}
 
 interface BriefingSetupModalProps {
   templateId: string;
@@ -30,7 +41,7 @@ export function BriefingSetupModal({ templateId, templateName }: BriefingSetupMo
   const { closeModal } = useModal();
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState<'form' | 'success'>('form');
-  const [quotes, setQuotes] = useState<any[]>([]);
+  const [quotes, setQuotes] = useState<QuoteOption[]>([]);
   const [createdBriefingId, setCreatedBriefingId] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
@@ -79,7 +90,7 @@ export function BriefingSetupModal({ templateId, templateName }: BriefingSetupMo
     setLoading(true);
 
     try {
-        const { data: userData } = await supabase.auth.getUser();
+        await supabase.auth.getUser();
         
         // 1. Create Briefing
         // We'll trust the 'briefings' table exists with the new columns
@@ -167,7 +178,7 @@ export function BriefingSetupModal({ templateId, templateName }: BriefingSetupMo
 
                 <Button 
                     onClick={() => closeModal()} 
-                    className="w-full bg-primary-500 hover:bg-[#65a30d] text-black font-bold h-12"
+                    className="w-full bg-primary-500 hover:bg-primary-600 text-black font-bold h-12"
                 >
                     Fechar
                 </Button>
@@ -222,7 +233,7 @@ export function BriefingSetupModal({ templateId, templateName }: BriefingSetupMo
             <Button type="button" variant="ghost" onClick={() => closeModal()} className="h-12 border border-white/10 text-white hover:bg-white/5">
                 Voltar
             </Button>
-            <Button type="submit" disabled={loading} className="h-12 bg-primary-500 hover:bg-[#65a30d] text-black font-bold px-8">
+            <Button type="submit" disabled={loading} className="h-12 bg-primary-500 hover:bg-primary-600 text-black font-bold px-8">
                 {loading ? <Loader2 className="animate-spin mr-2" /> : "Criar Briefing"}
             </Button>
         </div>

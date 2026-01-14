@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Search } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useModal } from "@/contexts/modal-context";
+import { useRouter } from "next/navigation";
 
 export function NewLeadModal() {
   const [formData, setFormData] = useState({
@@ -26,6 +27,7 @@ export function NewLeadModal() {
   });
   const [loading, setLoading] = useState(false);
   const { closeModal } = useModal();
+  const router = useRouter();
 
   async function handleSubmit() {
     setLoading(true);
@@ -47,8 +49,7 @@ export function NewLeadModal() {
     setLoading(false);
     if (!error) {
         closeModal();
-        // Optionally trigger a refresh or toast
-        window.location.reload(); // Simple refresh for MVP
+        router.refresh();
     } else {
         alert('Erro ao criar lead');
         console.error(error);
@@ -65,14 +66,14 @@ export function NewLeadModal() {
         
         {/* Row 1 */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Input label="Nome do Cliente" name="name" placeholder="Ex: Ana Costa" value={formData.name} onChange={handleChange} />
-            <Input label="Email" name="email" placeholder="cliente@email.com" value={formData.email} onChange={handleChange} />
+            <LeadInput label="Nome do Cliente" name="name" placeholder="Ex: Ana Costa" value={formData.name} onChange={handleChange} />
+            <LeadInput label="Email" name="email" placeholder="cliente@email.com" value={formData.email} onChange={handleChange} />
         </div>
 
         {/* Row 2 */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Input label="Telefone" name="phone" placeholder="(00) 00000-0000" value={formData.phone} onChange={handleChange} />
-            <Input label="Empresa" name="company" placeholder="Nome da empresa" value={formData.company} onChange={handleChange} />
+            <LeadInput label="Telefone" name="phone" placeholder="(00) 00000-0000" value={formData.phone} onChange={handleChange} />
+            <LeadInput label="Empresa" name="company" placeholder="Nome da empresa" value={formData.company} onChange={handleChange} />
         </div>
 
         {/* CPF/CNPJ */}
@@ -93,31 +94,31 @@ export function NewLeadModal() {
         </div>
 
         {/* CEP */}
-        <Input label="CEP" name="cep" placeholder="00000-000" value={formData.cep} onChange={handleChange} />
+        <LeadInput label="CEP" name="cep" placeholder="00000-000" value={formData.cep} onChange={handleChange} />
 
         {/* Address Row 1 */}
         <div className="flex gap-4">
             <div className="flex-1">
-                <Input label="Endereço" name="address" placeholder="Rua, Avenida..." value={formData.address} onChange={handleChange} />
+                <LeadInput label="Endereço" name="address" placeholder="Rua, Avenida..." value={formData.address} onChange={handleChange} />
             </div>
             <div className="w-24">
-                <Input label="Número" name="number" placeholder="Nº" value={formData.number} onChange={handleChange} />
+                <LeadInput label="Número" name="number" placeholder="Nº" value={formData.number} onChange={handleChange} />
             </div>
         </div>
 
         {/* Address Row 2 */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Input label="Bairro" name="neighborhood" placeholder="Bairro" value={formData.neighborhood} onChange={handleChange} />
-            <Input label="Cidade" name="city" placeholder="Cidade" value={formData.city} onChange={handleChange} />
-            <Input label="Estado" name="state" placeholder="UF" value={formData.state} onChange={handleChange} />
+            <LeadInput label="Bairro" name="neighborhood" placeholder="Bairro" value={formData.neighborhood} onChange={handleChange} />
+            <LeadInput label="Cidade" name="city" placeholder="Cidade" value={formData.city} onChange={handleChange} />
+            <LeadInput label="Estado" name="state" placeholder="UF" value={formData.state} onChange={handleChange} />
         </div>
 
         {/* Project Info */}
-        <Input label="Projeto" name="project" placeholder="Ex: Logo + Identidade Visual" value={formData.project} onChange={handleChange} />
+        <LeadInput label="Projeto" name="project" placeholder="Ex: Logo + Identidade Visual" value={formData.project} onChange={handleChange} />
         
-        <Input label="Valor Estimado" name="value" placeholder="4500" value={formData.value} onChange={handleChange} />
+        <LeadInput label="Valor Estimado" name="value" placeholder="4500" value={formData.value} onChange={handleChange} />
 
-        <Input label="Tags" name="tags" placeholder="Branding, Urgente" value={formData.tags} onChange={handleChange} />
+        <LeadInput label="Tags" name="tags" placeholder="Branding, Urgente" value={formData.tags} onChange={handleChange} />
 
         {/* Observations */}
         <div>
@@ -147,7 +148,7 @@ export function NewLeadModal() {
   );
 }
 
-interface InputProps {
+interface LeadInputProps {
     label: string;
     name: string;
     placeholder: string;
@@ -155,7 +156,7 @@ interface InputProps {
     onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-function Input({ label, name, placeholder, value, onChange }: InputProps) {
+function LeadInput({ label, name, placeholder, value, onChange }: LeadInputProps) {
     return (
         <div>
             <label className="text-xs font-bold text-zinc-500 uppercase tracking-wide mb-2 block">{label}</label>
@@ -165,7 +166,7 @@ function Input({ label, name, placeholder, value, onChange }: InputProps) {
                 value={value}
                 onChange={onChange}
                 placeholder={placeholder}
-                className="w-full bg-zinc-950 border border-white/10 rounded-lg p-3 text-white focus:outline-none focus:border-[#79CD25]/50 focus:ring-1 focus:ring-[#79CD25]/50 transition-all placeholder:text-zinc-600"
+                className="w-full bg-zinc-950 border border-white/10 rounded-lg p-3 text-white focus:outline-none focus:border-primary-500/50 focus:ring-1 focus:ring-primary-500/50 transition-all placeholder:text-zinc-600"
             />
         </div>
     )
