@@ -23,26 +23,31 @@ export default function ApprovalsPage() {
 
   useEffect(() => {
     async function loadApprovals() {
-      setLoading(true);
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      try {
+        setLoading(true);
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
 
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('client_id')
-        .eq('id', user.id)
-        .single();
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('client_id')
+          .eq('id', user.id)
+          .single();
 
-      if (profile?.client_id) {
-        const { data } = await supabase
-          .from('tasks')
-          .select('*')
-          .eq('client_id', profile.client_id)
-          .eq('status_approval', 'waiting_approval'); 
-        
-        setItems(data || []);
+        if (profile?.client_id) {
+          const { data } = await supabase
+            .from('tasks')
+            .select('*')
+            .eq('client_id', profile.client_id)
+            .eq('status_approval', 'waiting_approval'); 
+          
+          setItems(data || []);
+        }
+      } catch (err) {
+        console.error("Error loading approvals:", err);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     }
     loadApprovals();
   }, []);

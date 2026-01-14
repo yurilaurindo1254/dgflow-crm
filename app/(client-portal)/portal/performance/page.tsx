@@ -36,26 +36,31 @@ export default function PerformancePage() {
 
   useEffect(() => {
     async function loadMetrics() {
-      setLoading(true);
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      try {
+        setLoading(true);
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
 
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('client_id')
-        .eq('id', user.id)
-        .single();
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('client_id')
+          .eq('id', user.id)
+          .single();
 
-      if (profile?.client_id) {
-        const { data } = await supabase
-          .from('marketing_metrics')
-          .select('*')
-          .eq('client_id', profile.client_id)
-          .order('date', { ascending: true });
-        
-        setMetrics((data as MarketingMetric[]) || []);
+        if (profile?.client_id) {
+          const { data } = await supabase
+            .from('marketing_metrics')
+            .select('*')
+            .eq('client_id', profile.client_id)
+            .order('date', { ascending: true });
+          
+          setMetrics((data as MarketingMetric[]) || []);
+        }
+      } catch (err) {
+        console.error("Error loading metrics:", err);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     }
     loadMetrics();
   }, []);

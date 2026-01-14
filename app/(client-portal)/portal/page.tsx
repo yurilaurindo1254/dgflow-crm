@@ -53,49 +53,53 @@ export default function PortalDashboard() {
 
   useEffect(() => {
     async function loadPortalData() {
-      setLoading(true);
-      
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const { data: prof } = await supabase
-        .from('profiles')
-        .select('*, client:clients(name)')
-        .eq('id', user.id)
-        .single();
-      
-      setProfile(prof as Profile);
-
-      if (prof?.client_id) {
-        const { data: met } = await supabase
-          .from('marketing_metrics')
-          .select('*')
-          .eq('client_id', prof.client_id)
-          .order('date', { ascending: false });
+      try {
+        setLoading(true);
         
-        const totalSpend = met?.reduce((acc: number, curr: { spend: number }) => acc + Number(curr.spend), 0) || 0;
-        const totalLeads = met?.reduce((acc: number, curr: { leads: number }) => acc + Number(curr.leads), 0) || 0;
-        const totalSales = met?.reduce((acc: number, curr: { sales: number }) => acc + Number(curr.sales), 0) || 0;
-        const cpl = totalLeads > 0 ? totalSpend / totalLeads : 0;
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
 
-        setMetrics({ totalSpend, totalLeads, totalSales, cpl });
+        const { data: prof } = await supabase
+          .from('profiles')
+          .select('*, client:clients(name)')
+          .eq('id', user.id)
+          .single();
+        
+        setProfile(prof as Profile);
 
-        const { data: tsk } = await supabase
-          .from('tasks')
-          .select('*')
-          .eq('client_id', prof.client_id)
-          .limit(5);
-        setTasks((tsk as TaskSummary[]) || []);
+        if (prof?.client_id) {
+          const { data: met } = await supabase
+            .from('marketing_metrics')
+            .select('*')
+            .eq('client_id', prof.client_id)
+            .order('date', { ascending: false });
+          
+          const totalSpend = met?.reduce((acc: number, curr: { spend: number }) => acc + Number(curr.spend), 0) || 0;
+          const totalLeads = met?.reduce((acc: number, curr: { leads: number }) => acc + Number(curr.leads), 0) || 0;
+          const totalSales = met?.reduce((acc: number, curr: { sales: number }) => acc + Number(curr.sales), 0) || 0;
+          const cpl = totalLeads > 0 ? totalSpend / totalLeads : 0;
 
-        const { data: act } = await supabase
-          .from('task_activities')
-          .select('*, task:tasks(title)')
-          .order('created_at', { ascending: false })
-          .limit(10);
-        setActivities((act as ActivityItem[]) || []);
+          setMetrics({ totalSpend, totalLeads, totalSales, cpl });
+
+          const { data: tsk } = await supabase
+            .from('tasks')
+            .select('*')
+            .eq('client_id', prof.client_id)
+            .limit(5);
+          setTasks((tsk as TaskSummary[]) || []);
+
+          const { data: act } = await supabase
+            .from('task_activities')
+            .select('*, task:tasks(title)')
+            .order('created_at', { ascending: false })
+            .limit(10);
+          setActivities((act as ActivityItem[]) || []);
+        }
+      } catch (err) {
+        console.error("Error loading portal data:", err);
+      } finally {
+        setLoading(false);
       }
-      
-      setLoading(false);
     }
     loadPortalData();
   }, []);

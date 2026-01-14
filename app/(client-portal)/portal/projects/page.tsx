@@ -28,32 +28,37 @@ export default function ProjectsPage() {
 
   useEffect(() => {
     async function loadTasks() {
-      setLoading(true);
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      try {
+        setLoading(true);
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
 
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('client_id')
-        .eq('id', user.id)
-        .single();
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('client_id')
+          .eq('id', user.id)
+          .single();
 
-      if (profile?.client_id) {
-        const { data: tsk } = await supabase
-          .from('tasks')
-          .select('*')
-          .eq('client_id', profile.client_id)
-          .order('position');
-        
-        const { data: cols } = await supabase
-          .from('project_columns')
-          .select('*')
-          .order('order_index');
+        if (profile?.client_id) {
+          const { data: tsk } = await supabase
+            .from('tasks')
+            .select('*')
+            .eq('client_id', profile.client_id)
+            .order('position');
+          
+          const { data: cols } = await supabase
+            .from('project_columns')
+            .select('*')
+            .order('order_index');
 
-        setTasks((tsk as ProjectTask[]) || []);
-        setColumns((cols as ProjectColumn[]) || []);
+          setTasks((tsk as ProjectTask[]) || []);
+          setColumns((cols as ProjectColumn[]) || []);
+        }
+      } catch (err) {
+        console.error("Error loading tasks:", err);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     }
     loadTasks();
   }, []);
