@@ -1,114 +1,89 @@
 "use client";
 
-import { memo } from 'react';
-import { Handle, Position, NodeProps } from '@xyflow/react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { 
-  BarChart3, 
-  TrendingUp, 
-  DollarSign, 
-  MousePointer2, 
-  Globe, 
-  ShoppingCart, 
-  CheckCircle2,
-  ChevronRight
-} from 'lucide-react';
-import { LineChart, Line, ResponsiveContainer } from 'recharts';
-import { cn } from '@/lib/utils';
-import { NodeData } from './NodeDetailsSheet';
+import { memo } from "react";
+import { Handle, Position } from "@xyflow/react";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { TrendingUp, DollarSign, MousePointerClick } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-const MOCK_SPARKLINE = [
-  { v: 10 }, { v: 15 }, { v: 8 }, { v: 12 }, { v: 20 }, { v: 18 }, { v: 25 }
-];
-
-const NODE_TYPES = {
-  ad_source: { icon: Globe, title: 'Tráfego', color: 'text-blue-500' },
-  page: { icon: BarChart3, title: 'Página', color: 'text-purple-500' },
-  checkout: { icon: ShoppingCart, title: 'Checkout', color: 'text-orange-500' },
-  purchase: { icon: CheckCircle2, title: 'Venda', color: 'text-emerald-500' },
-};
-
-export const MetricNode = memo(({ data, selected }: { data: NodeData; selected: boolean }) => {
-  const nodeInfo = NODE_TYPES[data.type as keyof typeof NODE_TYPES] || NODE_TYPES.page;
-  const Icon = nodeInfo.icon;
-
+export const MetricNode = memo(({ data, selected }: any) => {
+  const isTraffic = data.type === 'traffic';
+  
   return (
-    <div className="group relative">
-      <Handle type="target" position={Position.Top} className="w-3 h-3 bg-zinc-800 border-zinc-700" />
+    <div className="relative group">
+      <Handle type="target" position={Position.Left} className="!bg-zinc-500 !w-3 !h-3 !-left-2" />
       
-      <Card className={cn(
-        "w-64 bg-zinc-950/80 backdrop-blur-xl border-white/5 transition-all duration-300 shadow-2xl",
-        selected ? "border-primary-500/50 ring-2 ring-primary-500/20" : "hover:border-white/10"
-      )}>
-        <CardHeader className="p-4 pb-2 border-b border-white/5 flex flex-row items-center justify-between space-y-0">
-          <div className="flex items-center gap-3">
-            <div className={cn("p-2 rounded-lg bg-white/5 group-hover:bg-white/10 transition-colors", nodeInfo.color)}>
-              <Icon size={18} />
-            </div>
-            <CardTitle className="text-sm font-bold text-white tracking-tight">
-              {data.label || nodeInfo.title}
-            </CardTitle>
-          </div>
-          <ChevronRight size={14} className="text-zinc-600 group-hover:text-zinc-400 transition-colors" />
-        </CardHeader>
-        
-        <CardContent className="p-4 space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            {data.type === 'ad_source' && (
-              <>
-                <MetricItem label="Gasto" value={`R$ ${data.spend || '0'}`} />
-                <MetricItem label="Cliques" value={data.clicks || '0'} />
-              </>
-            )}
-            {data.type === 'page' && (
-              <>
-                <MetricItem label="Visitas" value={data.visits || '0'} />
-                <MetricItem label="Scroll" value={`${data.scroll || '0'}%`} />
-              </>
-            )}
-            {data.type === 'checkout' && (
-              <>
-                <MetricItem label="Iniciados" value={data.checkouts || '0'} />
-                <MetricItem label="Abandono" value={`${data.abandonment || '0'}%`} />
-              </>
-            )}
-            {data.type === 'purchase' && (
-              <>
-                <MetricItem label="Vendas" value={data.sales || '0'} />
-                <MetricItem label="Ticket" value={`R$ ${data.aov || '0'}`} />
-              </>
-            )}
-          </div>
+      <Card 
+        className={cn(
+          "w-[280px] border-zinc-800 bg-zinc-950/90 backdrop-blur-xl shadow-2xl transition-all duration-300",
+          selected ? "border-primary-500 ring-2 ring-primary-500/20" : "hover:border-zinc-700",
+          "matrix-mode:border-green-500" 
+        )}
+      >
+        {/* Header Colorido */}
+        <div className={cn(
+          "h-1.5 w-full rounded-t-xl",
+          isTraffic ? "bg-blue-500" : "bg-primary-500"
+        )} />
 
-          <div className="h-10 w-full opacity-50 group-hover:opacity-100 transition-opacity">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={data.sparkline || MOCK_SPARKLINE}>
-                <Line 
-                  type="monotone" 
-                  dataKey="v" 
-                  stroke={selected ? "#79cd25" : "#52525b"} 
-                  strokeWidth={2} 
-                  dot={false} 
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </CardContent>
+        <div className="p-4 space-y-4">
+            {/* Título e Ícone */}
+            <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                    <div className={cn(
+                        "p-2 rounded-lg bg-zinc-900/50 border border-white/5",
+                        isTraffic ? "text-blue-400" : "text-primary-500"
+                    )}>
+                        {isTraffic ? <MousePointerClick size={16} /> : <DollarSign size={16} />}
+                    </div>
+                    <span className="font-bold text-zinc-100 text-sm">{data.label}</span>
+                </div>
+                {isTraffic && (
+                    <Badge variant="secondary" className="bg-blue-500/10 text-blue-400 border-blue-500/20 text-[10px]">
+                        Meta Ads
+                    </Badge>
+                )}
+            </div>
+
+            {/* Grid de Métricas */}
+            <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                    <p className="text-[10px] text-zinc-500 uppercase font-bold">
+                        {isTraffic ? 'Gasto' : 'Faturamento'}
+                    </p>
+                    <p className="text-sm font-mono font-bold text-white">
+                        {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(data.value)}
+                    </p>
+                </div>
+                <div className="space-y-1">
+                    <p className="text-[10px] text-zinc-500 uppercase font-bold">
+                        {isTraffic ? 'Cliques' : 'Vendas'}
+                    </p>
+                    <p className="text-sm font-mono font-bold text-white">
+                        {data.count}
+                    </p>
+                </div>
+            </div>
+
+            {/* Rodapé (Mini gráfico ou info extra) */}
+            <div className="pt-3 border-t border-white/5 flex items-center justify-between text-xs">
+                <span className="text-zinc-500 flex items-center gap-1">
+                    <TrendingUp size={12} /> Conv. {data.conversionRate}%
+                </span>
+                <span className={cn(
+                    "font-bold",
+                    data.roi > 0 ? "text-emerald-500" : "text-red-500"
+                )}>
+                    {data.roi > 0 ? '+' : ''}{data.roi}% ROI
+                </span>
+            </div>
+        </div>
       </Card>
 
-      <Handle type="source" position={Position.Bottom} className="w-3 h-3 bg-zinc-800 border-zinc-700" />
+      <Handle type="source" position={Position.Right} className="!bg-zinc-500 !w-3 !h-3 !-right-2" />
     </div>
   );
 });
 
-function MetricItem({ label, value }: { label: string; value: string | number }) {
-  return (
-    <div>
-      <p className="text-[10px] text-zinc-500 uppercase font-bold tracking-widest">{label}</p>
-      <p className="text-sm font-bold text-white mt-0.5">{value}</p>
-    </div>
-  );
-}
-
-MetricNode.displayName = 'MetricNode';
+MetricNode.displayName = "MetricNode";
