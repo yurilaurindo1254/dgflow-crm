@@ -60,10 +60,7 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(url)
     }
 
-    // Role-based protection: Prevent 'client' roles from accessing main dashboard
-    // and prevent 'admin/team' from being stuck in portal if needed (though usually admins can see portal)
-    
-    // Fetch user profile to get role
+    // Role-based protection
     const { data: profile } = await supabase
       .from('profiles')
       .select('role')
@@ -72,23 +69,63 @@ export async function middleware(request: NextRequest) {
 
     const role = profile?.role || 'client'
 
-    // 1. If 'client' tries to access admin routes -> redirect to /portal
-    const isAdminRoute = 
-      request.nextUrl.pathname === '/' || 
-      request.nextUrl.pathname.startsWith('/dashboard') ||
-      request.nextUrl.pathname.startsWith('/briefings') ||
-      request.nextUrl.pathname.startsWith('/clientes') ||
-      request.nextUrl.pathname.startsWith('/orcamentos') ||
-      request.nextUrl.pathname.startsWith('/servicos')
+    // Define Permissions locally to avoid import issues in Edge Middleware
+    const PERMISSIONS: Record<string, string[]> = {
+      admin: ['*'],
+      project_manager: [
+        '/projetos', 
+        '/tarefas', 
+        '/equipe', 
+        '/clientes', 
+        '/briefings',
+        '/' // Dashboard
+      ],
+      designer: ['/tarefas', '/agenda', '/briefings'],
+      editor: ['/tarefas', '/agenda', '/briefings'],
+      client: ['/portal']
+    };
 
-    if (role === 'client' && isAdminRoute) {
-      url.pathname = '/portal'
-      return NextResponse.redirect(url)
+    // Helper to check permission
+    const checkMiddlewarePermission = (userRole: string, path: string) => {
+      // Admin bypass
+      if (userRole === 'admin') return true;
+
+      const allowedPaths = PERMISSIONS[userRole] || [];
+      // '*' means all access (already handled by admin check but good for explicit config)
+      if (allowedPaths.includes('*')) return true;
+
+      // Check if current path matches or starts with any allowed path
+      // Special case: '/' matches exactly '/' but also we might want dashboard access
+      // For this logic, strict matching on start
+      return allowedPaths.some(allowed => {
+         if (allowed === '/') return path === '/'; // Strict root check
+         return path === allowed || path.startsWith(`${allowed}/`);
+      });
+    };
+
+    const currentPath = request.nextUrl.pathname;
+    
+    // Skip static assets or public api routes if they weren't caught by matcher (matcher handles most)
+    // Also skip internal next paths if any leak through
+    
+    // Logic:
+    // 1. If role is 'client' and trying to access regular dashboard -> Redirect to Portal
+    // 2. If role is 'designer/editor' and trying to access forbidden routes -> Redirect to their home (e.g. /tarefas)
+    
+    const isAllowed = checkMiddlewarePermission(role, currentPath);
+
+    if (!isAllowed) {
+       // Determine fallback
+       let fallback = '/';
+       if (role === 'client') fallback = '/portal';
+       else if (role === 'designer' || role === 'editor') fallback = '/tarefas';
+       
+       // Avoid redirect loop
+       if (currentPath !== fallback) {
+         url.pathname = fallback;
+         return NextResponse.redirect(url);
+       }
     }
-
-    // 2. If 'admin/team' tries to access /portal (optional: maybe allow? User said "Bloqueie o acesso de usuários com role 'client' ao /dashboard")
-    // We'll allow admins to see the portal for testing/management.
-
   }
 
   return response

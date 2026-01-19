@@ -11,9 +11,10 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
-import { PlayCircle, Image as ImageIcon } from "lucide-react";
+import { PlayCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
 
 interface Creative {
     id: string;
@@ -61,7 +62,7 @@ export function CreativeTable({ creatives }: { creatives: Creative[] }) {
                         </HoverCardTrigger>
                         <HoverCardContent className="w-[320px] p-0 border-zinc-800 bg-zinc-950 shadow-2xl overflow-hidden" align="start">
                             {creative.type === 'video' ? (
-                                <div className="aspect-[9/16] bg-black w-full relative">
+                                <div className="aspect-9/16 bg-black w-full relative">
                                     <video 
                                         src={creative.preview} 
                                         autoPlay 
@@ -69,12 +70,19 @@ export function CreativeTable({ creatives }: { creatives: Creative[] }) {
                                         loop 
                                         className="w-full h-full object-cover" 
                                     />
-                                    <div className="absolute bottom-0 inset-x-0 p-3 bg-gradient-to-t from-black/80 to-transparent">
+                                    <div className="absolute bottom-0 inset-x-0 p-3 bg-linear-to-t from-black/80 to-transparent">
                                         <p className="text-xs text-white font-medium line-clamp-2">{creative.name}</p>
                                     </div>
                                 </div>
                             ) : (
-                                <img src={creative.thumbnail} className="w-full h-auto" alt="Preview" />
+                                <div className="relative w-full aspect-square bg-black">
+                                    <Image 
+                                        src={creative.thumbnail} 
+                                        alt="Preview" 
+                                        fill
+                                        className="object-contain"
+                                    />
+                                </div>
                             )}
                         </HoverCardContent>
                     </HoverCard>

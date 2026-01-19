@@ -17,6 +17,8 @@ import {
   ChevronsUpDown,
   Briefcase,
   BarChart3,
+  Palette,
+  ScrollText,
 } from "lucide-react";
 import clsx from "clsx";
 import { usePathname, useRouter } from "next/navigation";
@@ -41,11 +43,28 @@ import { NewProposalModal } from '@/components/modals/new-proposal-modal';
 // ... (imports anteriores mantidos se não conflitarem, mas vou reescrever o componente para garantir a inserção correta)
 // Como o replace_file_content substitui o bloco, vou focar na parte do componente Sidebar.
 
+import { useEffect, useState } from "react";
+import { getUserRole, checkPermission, Role } from "@/lib/auth/roles";
+
+// ... existing imports
+
 export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { openModal } = useModal();
   const { language, setLanguage, currency, setCurrency, t } = useSettings();
+  const [userRole, setUserRole] = useState<Role | null>(null);
+
+  useEffect(() => {
+    async function fetchRole() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const role = await getUserRole(user.id);
+        setUserRole(role);
+      }
+    }
+    fetchRole();
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -62,6 +81,9 @@ export function Sidebar() {
     { name: t('sidebar.projects'), icon: Briefcase, href: "/projetos" },
     { name: t('sidebar.clients'), icon: Users, href: "/clientes" },
     { name: t('sidebar.pipelines'), icon: Filter, href: "/pipelines" },
+    { name: "Brand Center", icon: Palette, href: "/brand-center" },
+    { name: "Sala de Roteiros", icon: ScrollText, href: "/roteiros" },
+    { name: "Capacidade", icon: BarChart3, href: "/capacidade" },
     { name: t('sidebar.agenda'), icon: Calendar, href: "/agenda" },
     { name: t('sidebar.finance'), icon: DollarSign, href: "/financeiro" },
     { name: t('sidebar.services'), icon: Package, href: "/servicos" },
@@ -71,7 +93,12 @@ export function Sidebar() {
     { name: t('sidebar.link_bio'), icon: Smartphone, href: "/link-bio" },
     { name: t('sidebar.team'), icon: Users, href: "/equipe" },
     { name: t('sidebar.settings'), icon: Settings, href: "/configuracoes" },
-  ];
+  ].filter(item => {
+    if (!userRole) return false; // Or true if we want to show everything while loading, but safer to hide or show skeleton. Assuming 'admin' default or wait?
+    // Better UX: Show nothing or restricted list until loaded.
+    // For now, let's assume if role is checking, verify permission.
+    return checkPermission(userRole, item.href);
+  });
 
   return (
     <aside className="fixed left-0 top-0 h-full w-20 hover:w-64 bg-black/40 backdrop-blur-xl border-r border-white/5 flex flex-col z-50 transition-all duration-300 ease-in-out group overflow-hidden">

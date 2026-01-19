@@ -7,7 +7,7 @@ import '@xyflow/react/dist/style.css';
 import { MetricNode } from "@/components/funnel/MetricNode";
 import { CreativeTable } from "@/components/funnel/CreativeTable";
 import { 
-  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Bar, ComposedChart 
+  Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Bar, ComposedChart 
 } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
@@ -44,11 +44,11 @@ const MOCK_CHART_DATA = Array.from({ length: 30 }, (_, i) => ({
 const nodeTypes = { metric: MetricNode };
 
 export default function LaunchDashboardPage() {
-  const [nodes, setNodes, onNodesChange] = useNodesState(INITIAL_NODES);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(INITIAL_EDGES);
+  const [nodes, , onNodesChange] = useNodesState(INITIAL_NODES);
+  const [edges, , onEdgesChange] = useEdgesState(INITIAL_EDGES);
   const [selectedNode, setSelectedNode] = useState<string | null>(null);
 
-  const onNodeClick = (_: any, node: any) => {
+  const onNodeClick = (_: React.MouseEvent, node: { id: string }) => {
       setSelectedNode(node.id);
   };
 

@@ -7,12 +7,21 @@ import { Badge } from "@/components/ui/badge";
 import { TrendingUp, DollarSign, MousePointerClick } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export const MetricNode = memo(({ data, selected }: any) => {
+interface MetricNodeData {
+  label: string;
+  type: 'traffic' | 'page' | 'sale';
+  value: number;
+  count: number;
+  conversionRate: number;
+  roi: number;
+}
+
+export const MetricNode = memo(({ data, selected }: { data: MetricNodeData; selected: boolean }) => {
   const isTraffic = data.type === 'traffic';
   
   return (
     <div className="relative group">
-      <Handle type="target" position={Position.Left} className="!bg-zinc-500 !w-3 !h-3 !-left-2" />
+      <Handle type="target" position={Position.Left} className="bg-zinc-500! w-3! h-3! -left-2!" />
       
       <Card 
         className={cn(
@@ -69,7 +78,7 @@ export const MetricNode = memo(({ data, selected }: any) => {
             {/* Rodapé (Mini gráfico ou info extra) */}
             <div className="pt-3 border-t border-white/5 flex items-center justify-between text-xs">
                 <span className="text-zinc-500 flex items-center gap-1">
-                    <TrendingUp size={12} /> Conv. {data.conversionRate}%
+                    <MetricTrendingUp size={12} /> Conv. {data.conversionRate}%
                 </span>
                 <span className={cn(
                     "font-bold",
@@ -81,9 +90,12 @@ export const MetricNode = memo(({ data, selected }: any) => {
         </div>
       </Card>
 
-      <Handle type="source" position={Position.Right} className="!bg-zinc-500 !w-3 !h-3 !-right-2" />
+      <Handle type="source" position={Position.Right} className="bg-zinc-500! w-3! h-3! -right-2!" />
     </div>
   );
 });
+
+// Avoid naming collision if TrendingUp is used elsewhere or just for clarity
+const MetricTrendingUp = TrendingUp;
 
 MetricNode.displayName = "MetricNode";
